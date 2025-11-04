@@ -13,7 +13,199 @@
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
 
-## 🚀 Cài đặt Git
+## 🚀 Hướng dẫn cho thành viên mới
+
+### 1. Cài đặt các công cụ cần thiết
+- [Node.js](https://nodejs.org/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [pgAdmin4](https://www.pgadmin.org/download/)
+- [Git](https://git-scm.com/downloads)
+
+### 2. Clone và cài đặt project
+```bash
+# Clone repository
+git clone https://github.com/tnnkhoa3006/qlht-backend.git
+cd qlht-backend
+
+# Cài đặt dependencies
+npm install
+
+# Copy file môi trường
+cp .env.example .env
+```
+
+### 3. Khởi động Docker và Database
+```bash
+# Khởi động container PostgreSQL
+docker-compose up -d
+```
+
+### 4. Tạo Database trong pgAdmin4
+1. Mở pgAdmin4
+2. Tạo server mới:
+   - Chuột phải vào "Servers" -> "Register" -> "Server"
+   - Tab General:
+     - Name: QLHT Local (hoặc tên tùy chọn)
+   - Tab Connection:
+     - Host: localhost
+     - Port: 5432
+     - Username: postgres
+     - Password: teamdb@22cntt1
+3. Tạo database:
+   - Chuột phải vào "Databases"
+   - Create -> Database
+   - Database name: qlhtdb
+   - Save
+
+### 5. Chạy ứng dụng
+```bash
+npm start
+```
+
+Ứng dụng sẽ chạy tại: http://localhost:5000
+
+### ⚠️ Xử lý lỗi thường gặp
+
+1. Lỗi "password authentication failed":
+   - Kiểm tra lại thông tin trong file .env
+   - Đảm bảo đã tạo database trong pgAdmin4
+
+2. Lỗi "database does not exist":
+   - Kiểm tra đã tạo database "qlhtdb" trong pgAdmin4 chưa
+   - Đảm bảo đã refresh list databases trong pgAdmin4
+
+3. Lỗi Docker:
+   - Đảm bảo Docker Desktop đang chạy
+   - Thử restart Docker Desktop
+   - Chạy lại lệnh docker-compose up -d
+
+4. Port đã được sử dụng:
+   - Kiểm tra và tắt các ứng dụng đang dùng port 5432 (PostgreSQL) hoặc 5000 (Node.js)
+   - Hoặc đổi port trong file docker-compose.yml và .env
+
+### 🔄 Cập nhật code mới
+```bash
+# Pull code mới
+git pull
+
+# Cài đặt dependencies mới (nếu có)
+npm install
+
+# Khởi động lại container
+docker-compose restart
+```
+
+### 💾 Backup và Restore Database
+
+#### Backup (Sao lưu dữ liệu)
+```bash
+# Export toàn bộ database ra file SQL
+docker exec -t qlht-backend-db-1 pg_dump -U postgres qlhtdb > backup.sql
+
+# Export một bảng cụ thể (ví dụ: bảng users)
+docker exec -t qlht-backend-db-1 pg_dump -U postgres -t users qlhtdb > users_backup.sql
+```
+
+#### Restore (Khôi phục dữ liệu)
+```bash
+# Import từ file SQL vào database
+docker exec -i qlht-backend-db-1 psql -U postgres -d qlhtdb < backup.sql
+```
+
+#### Reset Database
+```bash
+# Dừng container
+docker-compose down
+
+# Xóa thư mục pgdata (cẩn thận: sẽ mất hết dữ liệu)
+rm -rf pgdata
+
+# Khởi động lại với database trống
+docker-compose up -d
+```
+
+#### Chia sẻ dữ liệu trong team
+1. Người chia sẻ:
+   - Export database: `docker exec -t qlht-backend-db-1 pg_dump -U postgres qlhtdb > share_data.sql`
+   - Chia sẻ file `share_data.sql` cho team
+
+2. Người nhận:
+   - Copy file `share_data.sql` vào thư mục project
+   - Import database: `docker exec -i qlht-backend-db-1 psql -U postgres -d qlhtdb < share_data.sql`
+
+#### Lưu ý về dữ liệu
+- Dữ liệu được lưu trong thư mục `pgdata`
+- KHÔNG xóa thư mục này nếu muốn giữ dữ liệu
+- Nên backup định kỳ để đề phòng mất dữ liệu
+- File `.gitignore` đã được cấu hình để không push dữ liệu database lên git
+
+## 🐳 Cài đặt và Chạy với Docker
+
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Node.js](https://nodejs.org/)
+
+### Các bước cài đặt
+
+1. **Clone repository và cài đặt dependencies**
+```bash
+git clone https://github.com/tnnkhoa3006/qlht-backend.git
+cd qlht-backend
+npm install
+```
+
+2. **Thiết lập môi trường**
+```bash
+# Copy file môi trường mẫu
+cp .env.example .env
+```
+
+3. **Chạy database với Docker**
+```bash
+# Khởi động PostgreSQL container
+docker-compose up -d
+```
+
+4. **Chạy ứng dụng**
+```bash
+npm start
+```
+
+Ứng dụng sẽ chạy tại `http://localhost:5000`
+
+### Cấu hình Database
+Database PostgreSQL sẽ được cấu hình với các thông tin sau:
+- Host: localhost
+- Port: 5432
+- Username: postgres
+- Password: khoatnnk
+- Database: demodb
+
+### Quản lý Container
+```bash
+# Xem logs của database
+docker logs qlht-backend-db-1
+
+# Dừng các containers
+docker-compose down
+
+# Khởi động lại containers
+docker-compose restart
+```
+
+### Troubleshooting Docker
+
+1. **Lỗi kết nối database**
+   - Kiểm tra Docker Desktop đã chạy chưa
+   - Kiểm tra container database đang chạy: `docker ps`
+   - Kiểm tra file `.env` có đúng thông tin không
+   - Thử khởi động lại container: `docker-compose restart`
+
+2. **Port đã được sử dụng**
+   - Kiểm tra có process nào đang dùng port 5432 không
+   - Có thể đổi port trong `docker-compose.yml` nếu cần
+
+## �🚀 Cài đặt Git
 
 ### Windows
 ```bash

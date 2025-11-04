@@ -215,6 +215,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# Database
+pgdata/
+
 # IDE files
 .vscode/
 .idea/
