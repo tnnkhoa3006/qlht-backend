@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: qlht-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgres://postgres:teamdb@22cntt1@db.emripxpypdhiluqdemje.supabase.co:5432/postgres
